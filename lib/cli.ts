@@ -1600,7 +1600,7 @@ program.command('mint-dft')
         rbf: options.rbf,
         satsbyte: parseInt(options.satsbyte),
         disableMiningChalk: options.disablechalk,
-      }, walletAddress, ticker, fundingRecord.WIF);
+      }, walletRecord, ticker, fundingRecord.WIF);
       handleResultLogging(result, true);
     } catch (error) {
       console.log(error);
