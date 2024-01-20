@@ -76,6 +76,7 @@ import { CreateDmintItemManifestsCommand } from "./commands/create-dmint-manifes
 import { CreateDmintCommand } from "./commands/create-dmint-command";
 import { TransferInteractiveBuilderCommand } from "./commands/transfer-interactive-builder-command";
 import { DecodeTxCommand } from "./commands/decode-tx-command";
+import { AwaitUtxoCommand } from "./commands/await-utxo-command";
 export { decorateAtomicals } from "./utils/atomical-format-helpers";
 export { addressToP2PKH } from "./utils/address-helpers";
 export { getExtendTaprootAddressKeypairPath } from "./utils/address-keypair-path";
@@ -350,7 +351,7 @@ export class Atomicals implements APIInterface {
     }
   }
 
-  async mintContainerItemInteractive(options: BaseRequestOptions, container: string, itemId: string, manifestFile: string, address: string, WIF: string, owner: IWalletRecord): Promise<CommandResultInterface> {
+  async mintContainerItemInteractive(options: BaseRequestOptions, container: string, itemId: string, manifestFile: string, address: string, WIF: string): Promise<CommandResultInterface> {
     try {
       await this.electrumApi.open();
       const command: CommandInterface = new MintInteractiveDitemCommand(this.electrumApi, options, container, itemId, manifestFile, address, WIF);
@@ -403,6 +404,22 @@ export class Atomicals implements APIInterface {
     try {
       await this.electrumApi.open();
       const command: CommandInterface = new MintInteractiveDftCommand(this.electrumApi, options, address, ticker, WIF);
+      return await command.run();
+    } catch (error: any) {
+      return {
+        success: false,
+        message: error.toString(),
+        error
+      }
+    } finally {
+      this.electrumApi.close();
+    }
+  }
+
+  async awaitUtxo(address: string, amount: number): Promise<CommandResultInterface> {
+    try {
+      await this.electrumApi.open();
+      const command: CommandInterface = new AwaitUtxoCommand(this.electrumApi, address, amount);
       return await command.run();
     } catch (error: any) {
       return {
@@ -674,7 +691,7 @@ export class Atomicals implements APIInterface {
         atomicalIdReceiptType,
         forceSkipValidation,
       );
-      
+
       return await command.run();
     } catch (error: any) {
       return {
